@@ -1,7 +1,52 @@
 import sys
-import random
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+try:
+    from PySide import QtCore, QtGui
+    from PySide.QtCore import Qt
+except ImportError:
+    import sip
+    for mod in ("QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"):
+        sip.setapi(mod, 2)
+
+    from PyQt4 import QtCore, QtGui
+    from PyQt4.QtCore import Qt
+
+
+def find_menu_items(menu, _path = None):
+    """Extracts items from a given Nuke menu
+
+    Returns a list of strings, with the path to each item
+
+    Ignores divider lines and hidden items (ones like "@;&CopyBranch" for shift+k)
+
+    >>> found = find_menu_items(nuke.menu("Nodes"))
+    >>> found.sort()
+    >>> found[:5]
+    ['/3D/Axis', '/3D/Camera', '/3D/CameraTracker', '/3D/DepthGenerator', '/3D/Geometry/Card']
+    """
+    import nuke
+
+    if _path is None:
+        _path = ""
+
+    found = []
+
+    mi = menu.items()
+    for i in mi:
+        if isinstance(i, nuke.Menu):
+            # Sub-menu, recurse
+            mname = i.name().replace("&", "")
+            sub_found = find_menu_items(menu = i, _path = "%s/%s" % (_path, mname))
+            found.extend(sub_found)
+        elif isinstance(i, nuke.MenuItem):
+            if i.name() == "":
+                # Skip dividers
+                continue
+            if i.name().startswith("@;"):
+                # Skip hidden items
+                continue
+            found.append("%s/%s" % (_path, i.name()))
+
+    return found
 
 
 def nonconsec_find(needle, haystack):
@@ -10,6 +55,7 @@ def nonconsec_find(needle, haystack):
     For example, "mm" can be found in "matchmove", but not "move2d"
     "m2" can be found in "move2d", but not "matchmove"
     """
+
     # Turn haystack into list of characters (as strings are immutable)
     haystack = [hay for hay in str(haystack)]
 
@@ -49,20 +95,6 @@ def string_similarity(str1, str2):
     return (2.0 * hit_count) / union
 
 
-def weighted_sort(x, y):
-    x = x.lower()
-    y = y.lower()
-    x_w = ShakeNodeSelector.nodeWeights.get(x, 0)
-    y_w = ShakeNodeSelector.nodeWeights.get(y, 0)
-
-    if x_w > y_w:
-        return -1
-    elif y_w < x_w:
-        return 1
-    else:
-        return cmp(x, y)
-
-
 class NodeWeights(object):
     def __init__(self, fname = None):
         self.fname = fname
@@ -74,15 +106,25 @@ class NodeWeights(object):
     def save(self):
         raise NotImplementedError("TODO") #TODO: Implement this
 
+    def get(self, k, default = 0):
+        if len(self.weights.values()) == 0:
+            maxval = 1.0
+        else:
+            maxval = max(self.weights.values())
+            maxval = min(1, maxval)
+            maxval = float(maxval)
+        return self.weights.get(k, default) / maxval
+
     def increment(self, key):
         self.weights.setdefault(key, 0)
         self.weights[key] += 1
 
 
 class NodeModel(QtCore.QAbstractListModel):
-    def __init__(self, mlist, num_items = 20, filtertext = ""):
+    def __init__(self, mlist, weights, num_items = 20, filtertext = ""):
         super(NodeModel, self).__init__()
 
+        self.weights = weights
         self.num_items = num_items
 
         self._all = mlist
@@ -94,38 +136,34 @@ class NodeModel(QtCore.QAbstractListModel):
         self.update()
 
     def update(self):
-        if len(self._filtertext) == 0:
-            # Blank filter text, alphanumeric sort
-            s = sorted(self._all)[:10]
-            self._items = [{'text': t, 'score': 0} for t in s[:10]]
-        else:
-            # Rank names based on user input
-            ranked = [(k, string_similarity(k, self._filtertext)) for k in self._all]
+        filtered = [x for x in self._all
+                    if nonconsec_find(self._filtertext.lower().replace(" ", "/"), x.lower())]
 
-            # Add node popularity to scores
-            #ranked = [(k, s + self.weights.get(k, 0)) for (k, s) in ranked]
+        scored = [{'text': k, 'score': self.weights.get(k)} for k in filtered]
 
-            # Get n most highly ranked
-            s = sorted(ranked, key = lambda k: k[1])[-self.num_items:][::-1]
+        # Store based on scores (descending), then alphabetically
+        s = sorted(scored, key = lambda k: (-k['score'], k['text']))
 
-            # Back into dictionary for use in data() etc
-            self._items = [{'text': t[0], 'score': t[1]} for t in s]
-
-        #self._items = [x for x in self._all if nonconsec_find(self._filtertext, x)]
+        self._items = s
         self.modelReset.emit()
 
     def rowCount(self, parent = QtCore.QModelIndex()):
+        print "row count", min(self.num_items, len(self._items))
         return min(self.num_items, len(self._items))
 
     def data(self, index, role = Qt.DisplayRole):
         if role == Qt.DisplayRole:
             # Return text to display
+            print index.row()
             return self._items[index.row()]['text']
         elif role == Qt.BackgroundRole:
+            return # FIXME: Nonsense
             weight = self._items[index.row()]['score']
 
             hue = 0.4
             sat = weight ** 2 # gamma saturation to make faster falloff
+
+            sat = min(1.0, sat)
 
             if index.row() % 2 == 0:
                 return QtGui.QColor.fromHsvF(hue, sat, 0.9)
@@ -136,6 +174,31 @@ class NodeModel(QtCore.QAbstractListModel):
             return None
 
 
+class TabyLineEdit(QtGui.QLineEdit):
+    def event(self, event):
+        """Make tab trigger returnPressed
+        """
+
+        #is_keypress = event.type() == QtCore.QEvent.Type.KeyPress
+        is_keypress = event.type() == QtCore.QEvent.KeyPress
+
+        if is_keypress and event.key() == QtCore.Qt.Key_Tab:
+            # Can't access tab key in keyPressedEvent
+            self.returnPressed.emit()
+            return True
+
+        elif is_keypress and event.key() == QtCore.Qt.Key_Up:
+            # These could be done in keyPressedEvent, but.. this is already here
+            print "up"
+            return True
+
+        elif is_keypress and event.key() == QtCore.Qt.Key_Down:
+            print "Down"
+            return True
+
+        return super(TabyLineEdit, self).event(event)
+
+
 class TabTabTabWidget(QtGui.QWidget):
     def __init__(self, parent = None):
         super(TabTabTabWidget, self).__init__(parent = parent)
@@ -144,13 +207,16 @@ class TabTabTabWidget(QtGui.QWidget):
         self.setMaximumSize(200, 300)
 
         # Input box
-        self.input = QtGui.QLineEdit()
+        self.input = TabyLineEdit()
 
+        # Node weighting
+        self.weights = NodeWeights("/tmp/weights.json")
 
-        words = [x.strip() for x in random.sample(open("/usr/share/dict/words").readlines(), 1000)]
+        import data_test
+        nodes = data_test.menu_items
 
         # List of stuff, and associated model
-        self.things_model = NodeModel(words)
+        self.things_model = NodeModel(nodes, weights = self.weights)
         self.things = QtGui.QListView()
         self.things.setModel(self.things_model)
 
@@ -165,9 +231,24 @@ class TabTabTabWidget(QtGui.QWidget):
 
         # Connect text change
         self.input.textChanged.connect(self.update)
+        self.input.returnPressed.connect(self.create)
 
     def update(self, text):
+        print "updating based on", text
+        self.things.setCurrentIndex(self.things_model.index(0))
         self.things_model.set_filter(text)
+
+    def create(self):
+        selected = self.things.selectedIndexes()
+
+        if len(selected) == 0:
+            # Get first item
+            selected = self.things_model.index(0)
+        else:
+            selected = selected[0]
+
+        thing = selected.data()
+        self.weights.increment(thing)
 
 
 if __name__ == '__main__':
