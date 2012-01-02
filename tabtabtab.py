@@ -211,13 +211,19 @@ class TabyLineEdit(QtGui.QLineEdit):
         elif is_keypress and event.key() == QtCore.Qt.Key_Down:
             print "Down"
             return True
+        elif is_keypress and event.key() == QtCore.Qt.Key_Escape:
+            # TODO: Emit custom signal maybe?
+            self.parent().close()
+            return True
 
         return super(TabyLineEdit, self).event(event)
 
 
 class TabTabTabWidget(QtGui.QWidget):
-    def __init__(self, on_create = None, parent = None):
+    def __init__(self, on_create = None, parent = None, winflags = None):
         super(TabTabTabWidget, self).__init__(parent = parent)
+        if winflags is not None:
+            self.setWindowFlags(winflags)
 
         self.setMinimumSize(200, 300)
         self.setMaximumSize(200, 300)
