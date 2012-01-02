@@ -288,7 +288,7 @@ class TabTabTabWidget(QtGui.QWidget):
         thing = selected.data()
         self.cb_on_create(name = thing)
         self.weights.increment(thing)
-
+        self.close()
 
 if __name__ == '__main__':
     try:
