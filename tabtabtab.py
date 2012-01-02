@@ -298,7 +298,19 @@ class TabTabTabWidget(QtGui.QWidget):
         self.weights.increment(thing)
         self.close()
 
-if __name__ == '__main__':
+
+_tabtabtab_instance = None
+def main():
+    global _tabtabtab_instance
+
+    if _tabtabtab_instance is not None:
+        # TODO: Is there a better way of doing this? If a
+        # TabTabTabWidget is instanced, it goes out of scope at end of
+        # function and disappers instantly. This seems like a
+        # reasonable "workaround"
+        _tabtabtab_instance.show()
+        return
+
     try:
         # For testing outside Nuke
         app = QtGui.QApplication(sys.argv)
@@ -312,11 +324,22 @@ if __name__ == '__main__':
             mitem = m.findItem(name.lstrip("/")) # FIXME: Mismatch caused by find_menu_items
             mitem.invoke()
         except ImportError:
-            pass
+            print "creating %s" % name
 
-    t = TabTabTabWidget(on_create = on_create)
+    t = TabTabTabWidget(on_create = on_create, winflags = Qt.FramelessWindowHint)
     t.show()
     t.raise_()
 
+    _tabtabtab_instance = t
+
     if app is not None:
         app.exec_()
+
+
+if __name__ == '__main__':
+    try:
+        import nuke
+        m_edit = nuke.menu("Nuke").findItem("Edit")
+        m_edit.addCommand("Tabtabtab", main, "Tab")
+    except ImportError:
+        main()
