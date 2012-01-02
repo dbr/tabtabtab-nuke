@@ -285,11 +285,13 @@ class TabTabTabWidget(QtGui.QWidget):
     def create(self):
         selected = self.things.selectedIndexes()
 
-        if len(selected) == 0:
-            # Get first item
-            selected = self.things_model.index(0)
-        else:
+        if len(selected) > 0:
+            # Get first selected item
             selected = selected[0]
+
+        else:
+            # Nothing selected, get first item
+            selected = self.things_model.index(0)
 
         thing = selected.data()
         self.cb_on_create(name = thing)
