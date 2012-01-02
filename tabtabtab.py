@@ -205,6 +205,8 @@ class TabyLineEdit(QtGui.QLineEdit):
 
         elif is_keypress and event.key() == QtCore.Qt.Key_Up:
             # These could be done in keyPressedEvent, but.. this is already here
+
+            # TODO: Emit signal for up/down events
             print "up"
             return True
 
@@ -327,7 +329,7 @@ def main():
             print "creating %s" % name
 
     t = TabTabTabWidget(on_create = on_create, winflags = Qt.FramelessWindowHint)
-    t.show()
+    t.show() #TODO: Make it appear under cursor like Nuke's tab thing does
     t.raise_()
 
     _tabtabtab_instance = t
