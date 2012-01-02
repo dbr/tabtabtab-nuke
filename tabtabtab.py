@@ -262,17 +262,27 @@ class TabTabTabWidget(QtGui.QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
 
-        # Connect text change
+        # Update on text change
         self.input.textChanged.connect(self.update)
+
+        # Reset selection on text change
+        self.input.textChanged.connect(lambda: self.move_selection(first=True))
+        self.move_selection(first = True) # Set initial selection
+
+        # When enter/tab is pressed, create node
         self.input.returnPressed.connect(self.create)
 
         # Up and down arrow handling
         self.input.pressed_up.connect(lambda: self.move_selection(up=True))
         self.input.pressed_down.connect(lambda: self.move_selection(down=True))
 
-    def move_selection(self, up = False, down = False):
-        if not (up or down) or (up and down):
-            raise ValueError("Specify either up, or down")
+    def move_selection(self, up = False, down = False, first = False):
+        if [up, down, first].count(True) != 1:
+            raise ValueError("Specify either up, down or first")
+
+        if first:
+            self.things.setCurrentIndex(self.things_model.index(0))
+            return
 
         cur = self.things.currentIndex()
         if up:
