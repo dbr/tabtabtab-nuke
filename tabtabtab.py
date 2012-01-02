@@ -263,6 +263,15 @@ class TabTabTabWidget(QtGui.QWidget):
         self.input.textChanged.connect(self.update)
         self.input.returnPressed.connect(self.create)
 
+    def event(self, event):
+        """Close when window becomes inactive (click outside of window)
+        """
+        if event.type() == QtCore.QEvent.WindowDeactivate:
+            self.close()
+            return True
+        else:
+            return super(TabTabTabWidget, self).event(event)
+
     def update(self, text):
         self.things.setCurrentIndex(self.things_model.index(0))
         self.things_model.set_filter(text)
