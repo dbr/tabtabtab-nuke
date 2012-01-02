@@ -141,7 +141,6 @@ class NodeModel(QtCore.QAbstractListModel):
         self.modelReset.emit()
 
     def rowCount(self, parent = QtCore.QModelIndex()):
-        print "row count", min(self.num_items, len(self._items))
         return min(self.num_items, len(self._items))
 
     def data(self, index, role = Qt.DisplayRole):
@@ -232,8 +231,13 @@ class TabTabTabWidget(QtGui.QWidget):
         # Node weighting
         self.weights = NodeWeights("/tmp/weights.json")
 
-        import data_test
-        nodes = data_test.menu_items
+        try:
+            import nuke
+            nodes = find_menu_items(nuke.menu("Nodes"))
+        except ImportError:
+            # FIXME: For testing outside Nuke, should be refactored
+            import data_test
+            nodes = data_test.menu_items
 
         # List of stuff, and associated model
         self.things_model = NodeModel(nodes, weights = self.weights)
@@ -254,7 +258,6 @@ class TabTabTabWidget(QtGui.QWidget):
         self.input.returnPressed.connect(self.create)
 
     def update(self, text):
-        print "updating based on", text
         self.things.setCurrentIndex(self.things_model.index(0))
         self.things_model.set_filter(text)
 
@@ -273,14 +276,24 @@ class TabTabTabWidget(QtGui.QWidget):
 
 
 if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+    try:
+        # For testing outside Nuke
+        app = QtGui.QApplication(sys.argv)
+    except RuntimeError:
+        app = None
+
     def on_create(name):
-        import nuke
-        m = nuke.menu("Nodes")
-        mitem = m.findItem(name)
-        mitem.invoke()
+        try:
+            import nuke
+            m = nuke.menu("Nodes")
+            mitem = m.findItem(name.lstrip("/")) # FIXME: Mismatch caused by find_menu_items
+            mitem.invoke()
+        except ImportError:
+            pass
 
     t = TabTabTabWidget(on_create = on_create)
     t.show()
     t.raise_()
-    app.exec_()
+
+    if app is not None:
+        app.exec_()
