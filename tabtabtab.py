@@ -276,6 +276,12 @@ class TabTabTabWidget(QtGui.QWidget):
         self.things.setCurrentIndex(self.things_model.index(0))
         self.things_model.set_filter(text)
 
+    def close(self):
+        """Clear current input when closing
+        """
+        self.input.setText("")
+        super(TabTabTabWidget, self).close()
+
     def create(self):
         selected = self.things.selectedIndexes()
 
