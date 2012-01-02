@@ -84,7 +84,7 @@ def nonconsec_find(needle, haystack):
             return False
         else:
             # Dont find string in same pos or backwards again
-            del haystack[:needle_pos]
+            del haystack[:needle_pos + 1]
     return True
 
 
