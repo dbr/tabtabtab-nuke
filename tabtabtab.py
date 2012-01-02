@@ -217,11 +217,14 @@ class TabyLineEdit(QtGui.QLineEdit):
 
 
 class TabTabTabWidget(QtGui.QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, on_create = None, parent = None):
         super(TabTabTabWidget, self).__init__(parent = parent)
 
         self.setMinimumSize(200, 300)
         self.setMaximumSize(200, 300)
+
+        # Store callback
+        self.cb_on_create = on_create
 
         # Input box
         self.input = TabyLineEdit()
@@ -265,12 +268,19 @@ class TabTabTabWidget(QtGui.QWidget):
             selected = selected[0]
 
         thing = selected.data()
+        self.cb_on_create(name = thing)
         self.weights.increment(thing)
 
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
-    t = TabTabTabWidget()
+    def on_create(name):
+        import nuke
+        m = nuke.menu("Nodes")
+        mitem = m.findItem(name)
+        mitem.invoke()
+
+    t = TabTabTabWidget(on_create = on_create)
     t.show()
     t.raise_()
     app.exec_()
