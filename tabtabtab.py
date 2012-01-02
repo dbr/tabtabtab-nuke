@@ -191,6 +191,9 @@ class NodeModel(QtCore.QAbstractListModel):
 
 
 class TabyLineEdit(QtGui.QLineEdit):
+    pressed_up = QtCore.Signal()
+    pressed_down = QtCore.Signal()
+
     def event(self, event):
         """Make tab trigger returnPressed
         """
@@ -205,13 +208,11 @@ class TabyLineEdit(QtGui.QLineEdit):
 
         elif is_keypress and event.key() == QtCore.Qt.Key_Up:
             # These could be done in keyPressedEvent, but.. this is already here
-
-            # TODO: Emit signal for up/down events
-            print "up"
+            self.pressed_up.emit()
             return True
 
         elif is_keypress and event.key() == QtCore.Qt.Key_Down:
-            print "Down"
+            self.pressed_down.emit()
             return True
         elif is_keypress and event.key() == QtCore.Qt.Key_Escape:
             # TODO: Emit custom signal maybe?
@@ -264,6 +265,21 @@ class TabTabTabWidget(QtGui.QWidget):
         # Connect text change
         self.input.textChanged.connect(self.update)
         self.input.returnPressed.connect(self.create)
+
+        # Up and down arrow handling
+        self.input.pressed_up.connect(lambda: self.move_selection(up=True))
+        self.input.pressed_down.connect(lambda: self.move_selection(down=True))
+
+    def move_selection(self, up = False, down = False):
+        if not (up or down) or (up and down):
+            raise ValueError("Specify either up, or down")
+
+        cur = self.things.currentIndex()
+        if up:
+            new = max(0, cur.row() - 1)
+        elif down:
+            new = min(self.things_model.rowCount(), cur.row() + 1)
+        self.things.setCurrentIndex(self.things_model.index(new))
 
     def event(self, event):
         """Close when window becomes inactive (click outside of window)
