@@ -54,7 +54,25 @@ def nonconsec_find(needle, haystack):
     necessarily consecutivly) in haystack.
     For example, "mm" can be found in "matchmove", but not "move2d"
     "m2" can be found in "move2d", but not "matchmove"
+
+    >>> nonconsec_find("m2", "move2d")
+    True
+    >>> nonconsec_find("m2", "matchmove")
+    False
+
+    Only checks after the last "/", unless needle contains "/" in
+    which case the entire string is checked:
+
+    >>> nonconsec_find("aa", "aa/bb")
+    False
+    >>> nonconsec_find("bb", "aa/bb")
+    True
+    >>> nonconsec_find("a/", "aa/bb")
+    True
     """
+
+    if "/" not in needle:
+        haystack = haystack.split("/")[-1]
 
     # Turn haystack into list of characters (as strings are immutable)
     haystack = [hay for hay in str(haystack)]
@@ -68,31 +86,6 @@ def nonconsec_find(needle, haystack):
             # Dont find string in same pos or backwards again
             del haystack[:needle_pos]
     return True
-
-
-def get_bigrams(string):
-    '''
-    Takes a string and returns a list of bigrams
-    '''
-    s = string.lower()
-    return [s[i:i+2] for i in xrange(len(s) - 1)]
-
-
-def string_similarity(str1, str2):
-    '''
-    Perform bigram comparison between two strings
-    and return a percentage match in decimal form
-
-    http://stackoverflow.com/a/6859596
-    '''
-    pairs1 = get_bigrams(str1)
-    pairs2 = get_bigrams(str2)
-    union  = len(pairs1) + len(pairs2)
-    hit_count = 0
-    for x in pairs1:
-        for y in pairs2:
-            if x == y: hit_count += 1
-    return (2.0 * hit_count) / union
 
 
 class NodeWeights(object):
@@ -154,10 +147,34 @@ class NodeModel(QtCore.QAbstractListModel):
     def data(self, index, role = Qt.DisplayRole):
         if role == Qt.DisplayRole:
             # Return text to display
-            print index.row()
-            return self._items[index.row()]['text']
+            raw = self._items[index.row()]['text']
+            return raw
+
+            """
+            # To mirror Nuke's default thing, but need to rework search:
+            value = raw.rpartition("/")
+            return "%s [%s]" % (value[2], value[0])
+            """
+
+        elif role == Qt.DecorationRole:
+            weight = self._items[index.row()]['score']
+
+            hue = 0.4
+            sat = weight ** 2 # gamma saturation to make faster falloff
+
+            sat = min(1.0, sat)
+
+            if index.row() % 2 == 0:
+                col = QtGui.QColor.fromHsvF(hue, sat, 0.9)
+            else:
+                col = QtGui.QColor.fromHsvF(hue, sat, 0.8)
+
+            pix = QtGui.QPixmap(12, 12)
+            pix.fill(col)
+            return pix
+
         elif role == Qt.BackgroundRole:
-            return # FIXME: Nonsense
+            return
             weight = self._items[index.row()]['score']
 
             hue = 0.4
