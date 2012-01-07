@@ -59,20 +59,10 @@ def nonconsec_find(needle, haystack):
     True
     >>> nonconsec_find("m2", "matchmove")
     False
-
-    Only checks after the last "/", unless needle contains "/" in
-    which case the entire string is checked:
-
-    >>> nonconsec_find("aa", "aa/bb")
-    False
-    >>> nonconsec_find("bb", "aa/bb")
-    True
-    >>> nonconsec_find("a/", "aa/bb")
-    True
     """
 
-    if "/" not in needle:
-        haystack = haystack.split("/")[-1]
+    if not (" " in needle or "[" in needle):
+        haystack = haystack.rpartition(" [")[0]
 
     # Turn haystack into list of characters (as strings are immutable)
     haystack = [hay for hay in str(haystack)]
@@ -130,7 +120,7 @@ class NodeModel(QtCore.QAbstractListModel):
 
     def update(self):
         filtered = [x for x in self._all
-                    if nonconsec_find(self._filtertext.lower().replace(" ", "/"), x.lower())]
+                    if nonconsec_find(self._filtertext.lower(), x.lower())]
 
         scored = [{'text': k, 'score': self.weights.get(k)} for k in filtered]
 
@@ -148,12 +138,6 @@ class NodeModel(QtCore.QAbstractListModel):
             # Return text to display
             raw = self._items[index.row()]['text']
             return raw
-
-            """
-            # To mirror Nuke's default thing, but need to rework search:
-            value = raw.rpartition("/")
-            return "%s [%s]" % (value[2], value[0])
-            """
 
         elif role == Qt.DecorationRole:
             weight = self._items[index.row()]['score']
@@ -247,6 +231,8 @@ class TabTabTabWidget(QtGui.QWidget):
             # FIXME: For testing outside Nuke, should be refactored
             import data_test
             nodes = data_test.menu_items
+
+        nodes = ["%s [%s]" % (n.rpartition("/")[2], n.rpartition("/")[0]) for n in nodes]
 
         # List of stuff, and associated model
         self.things_model = NodeModel(nodes, weights = self.weights)
