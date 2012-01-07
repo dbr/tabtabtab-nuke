@@ -49,7 +49,7 @@ def find_menu_items(menu, _path = None):
     return found
 
 
-def nonconsec_find(needle, haystack):
+def nonconsec_find(needle, haystack, anchored = False):
     """checks if each character of "needle" can be found in order (but not
     necessarily consecutivly) in haystack.
     For example, "mm" can be found in "matchmove", but not "move2d"
@@ -59,13 +59,38 @@ def nonconsec_find(needle, haystack):
     True
     >>> nonconsec_find("m2", "matchmove")
     False
+
+    Anchored ensures the first letter matches
+
+    >>> nonconsec_find("atch", "matchmove", anchored = False)
+    True
+    >>> nonconsec_find("atch", "matchmove", anchored = True)
+    False
+    >>> nonconsec_find("match", "matchmove", anchored = True)
+    True
     """
+
+    if len(haystack) == 0 and len(needle) > 0:
+        # "a" is not in ""
+        return False
+
+    elif len(needle) == 0 and len(haystack) > 0:
+        # "" is in "blah"
+        return True
 
     if not (" " in needle or "[" in needle):
         haystack = haystack.rpartition(" [")[0]
 
     # Turn haystack into list of characters (as strings are immutable)
     haystack = [hay for hay in str(haystack)]
+
+    if anchored:
+        if needle[0] != haystack[0]:
+            return False
+        else:
+            # First letter matches, remove it for further matches
+            needle = needle[1:]
+            del haystack[0]
 
     for needle_atom in needle:
         try:
@@ -120,7 +145,7 @@ class NodeModel(QtCore.QAbstractListModel):
 
     def update(self):
         filtered = [x for x in self._all
-                    if nonconsec_find(self._filtertext.lower(), x.lower())]
+                    if nonconsec_find(self._filtertext.lower(), x.lower(), anchored=True)]
 
         scored = [{'text': k, 'score': self.weights.get(k)} for k in filtered]
 
