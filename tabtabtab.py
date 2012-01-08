@@ -27,12 +27,9 @@ def find_menu_items(menu, _path = None):
     >>> found = find_menu_items(nuke.menu("Nodes"))
     >>> found.sort()
     >>> found[:5]
-    ['/3D/Axis', '/3D/Camera', '/3D/CameraTracker', '/3D/DepthGenerator', '/3D/Geometry/Card']
+    ['3D/Axis', '3D/Camera', '3D/CameraTracker', '3D/DepthGenerator', '3D/Geometry/Card']
     """
     import nuke
-
-    if _path is None:
-        _path = ""
 
     found = []
 
@@ -41,7 +38,8 @@ def find_menu_items(menu, _path = None):
         if isinstance(i, nuke.Menu):
             # Sub-menu, recurse
             mname = i.name().replace("&", "")
-            sub_found = find_menu_items(menu = i, _path = "%s/%s" % (_path, mname))
+            subpath = "/".join(x for x in (_path, mname) if x is not None)
+            sub_found = find_menu_items(menu = i, _path = subpath)
             found.extend(sub_found)
         elif isinstance(i, nuke.MenuItem):
             if i.name() == "":
@@ -50,7 +48,9 @@ def find_menu_items(menu, _path = None):
             if i.name().startswith("@;"):
                 # Skip hidden items
                 continue
-            found.append("%s/%s" % (_path, i.name()))
+
+            subpath = "/".join(x for x in (_path, i.name()) if x is not None)
+            found.append(subpath)
 
     return found
 
@@ -154,10 +154,18 @@ class NodeModel(QtCore.QAbstractListModel):
 
         # Two spaces as a shortcut for [
         filtertext = filtertext.replace("  ", "[")
-        filtered = [x for x in self._all
-                    if nonconsec_find(filtertext, x.lower(), anchored=True)]
 
-        scored = [{'text': k, 'score': self.weights.get(k)} for k in filtered]
+        scored = []
+        for n in self._all:
+            uiname = "%s [%s]" % (n.rpartition("/")[2], n.rpartition("/")[0])
+            if nonconsec_find(filtertext, uiname.lower(), anchored=True):
+                # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
+                score = self.weights.get(n)
+
+                scored.append({
+                        'text': uiname,
+                        'menupath': n,
+                        'score': score})
 
         # Store based on scores (descending), then alphabetically
         s = sorted(scored, key = lambda k: (-k['score'], k['text']))
@@ -207,6 +215,22 @@ class NodeModel(QtCore.QAbstractListModel):
         else:
             # Ignore other roles
             return None
+
+    def getorig(self, selected):
+        # TODO: Is there a way to get this via data()? There's no
+        # Qt.DataRole or something (only DisplayRole)
+
+        if len(selected) > 0:
+            # Get first selected index
+            selected = selected[0]
+
+        else:
+            # Nothing selected, get first index
+            selected = self.index(0)
+
+        # TODO: Maybe check for IndexError?
+        selected_data = self._items[selected.row()]
+        return selected_data
 
 
 class TabyLineEdit(QtGui.QLineEdit):
@@ -265,8 +289,6 @@ class TabTabTabWidget(QtGui.QWidget):
             # FIXME: For testing outside Nuke, should be refactored
             import data_test
             nodes = data_test.menu_items
-
-        nodes = ["%s [%s]" % (n.rpartition("/")[2], n.rpartition("/")[0]) for n in nodes]
 
         # List of stuff, and associated model
         self.things_model = NodeModel(nodes, weights = self.weights)
@@ -338,19 +360,19 @@ class TabTabTabWidget(QtGui.QWidget):
         super(TabTabTabWidget, self).close()
 
     def create(self):
+        # Get selected item
         selected = self.things.selectedIndexes()
+        if len(selected) == 0:
+            return
 
-        if len(selected) > 0:
-            # Get first selected item
-            selected = selected[0]
+        thing = self.things_model.getorig(selected)
 
-        else:
-            # Nothing selected, get first item
-            selected = self.things_model.index(0)
+        # Get Nuke menu path of selected
+        menupath = thing['menupath']
 
-        thing = selected.data()
-        self.cb_on_create(name = thing)
-        self.weights.increment(thing)
+        # Create node, increment weight and close
+        self.cb_on_create(menupath = menupath)
+        self.weights.increment(menupath)
         self.close()
 
 
@@ -372,14 +394,14 @@ def main():
     except RuntimeError:
         app = None
 
-    def on_create(name):
+    def on_create(menupath):
         try:
             import nuke
             m = nuke.menu("Nodes")
-            mitem = m.findItem(name.lstrip("/")) # FIXME: Mismatch caused by find_menu_items
+            mitem = m.findItem(menupath) # FIXME: Mismatch caused by find_menu_items
             mitem.invoke()
         except ImportError:
-            print "creating %s" % name
+            print "creating %s" % menupath
 
     t = TabTabTabWidget(on_create = on_create, winflags = Qt.FramelessWindowHint)
     t.show() #TODO: Make it appear under cursor like Nuke's tab thing does
