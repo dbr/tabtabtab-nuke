@@ -4,6 +4,7 @@ homepage: https://github.com/dbr/tabtabtab-nuke
 license: http://unlicense.org/
 """
 
+import os
 import sys
 
 try:
@@ -116,10 +117,53 @@ class NodeWeights(object):
         self.weights = {}
 
     def load(self):
-        raise NotImplementedError("TODO") #TODO: Implement this
+        if self.fname is None:
+            return
+
+        def _load_internal():
+            import json
+            if not os.path.isfile(self.fname):
+                print "Weight file does not exist"
+                return
+            f = open(self.fname)
+            self.weights = json.load(f)
+            f.close()
+
+        # Catch any errors, print traceback and continue
+        try:
+            _load_internal()
+        except Exception:
+            print "Error loading node weights"
+            import traceback
+            traceback.print_exc()
 
     def save(self):
-        raise NotImplementedError("TODO") #TODO: Implement this
+        if self.fname is None:
+            print "Not saving node weights, no file specified"
+            return
+
+        def _save_internal():
+            import json
+            ndir = os.path.dirname(self.fname)
+            if not os.path.isdir(ndir):
+                try:
+                    os.makedir(ndir)
+                except OSError, e:
+                    if e.errno != 17: # errno 17 is "already exists"
+                        raise
+
+            f = open(self.fname, "w")
+            # TODO: Limit number of saved items to some sane number
+            json.dump(self.weights, fp = f)
+            f.close()
+
+        # Catch any errors, print traceback and continue
+        try:
+            _save_internal()
+        except Exception:
+            print "Error saving node weights"
+            import traceback
+            traceback.print_exc()
 
     def get(self, k, default = 0):
         if len(self.weights.values()) == 0:
@@ -281,8 +325,8 @@ class TabTabTabWidget(QtGui.QWidget):
         self.input = TabyLineEdit()
 
         # Node weighting
-        self.weights = NodeWeights("/tmp/weights.json")
-
+        self.weights = NodeWeights(os.path.expanduser("~/.nuke/tabtabtab_weights.json"))
+        self.weights.load() # save called in close method
         try:
             import nuke
             nodes = find_menu_items(nuke.menu("Nodes"))
@@ -358,6 +402,7 @@ class TabTabTabWidget(QtGui.QWidget):
         """Clear current input when closing
         """
         self.input.setText("")
+        self.weights.save()
         super(TabTabTabWidget, self).close()
 
     def create(self):
