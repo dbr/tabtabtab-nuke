@@ -188,6 +188,9 @@ class NodeModel(QtCore.QAbstractListModel):
 
         self._all = mlist
         self._filtertext = filtertext
+
+        # _items is the list of objects to be shown, update sets this
+        self._items = []
         self.update()
 
     def set_filter(self, filtertext):
@@ -202,9 +205,11 @@ class NodeModel(QtCore.QAbstractListModel):
 
         scored = []
         for n in self._all:
+            # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
             uiname = "%s [%s]" % (n.rpartition("/")[2], n.rpartition("/")[0])
+
             if nonconsec_find(filtertext, uiname.lower(), anchored=True):
-                # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
+                # Matches, get weighting and add to list of stuff
                 score = self.weights.get(n)
 
                 scored.append({
@@ -302,6 +307,7 @@ class TabyLineEdit(QtGui.QLineEdit):
         elif is_keypress and event.key() == QtCore.Qt.Key_Down:
             self.pressed_arrow.emit("down")
             return True
+
         elif is_keypress and event.key() == QtCore.Qt.Key_Escape:
             self.cancelled.emit()
             return True
@@ -327,6 +333,7 @@ class TabTabTabWidget(QtGui.QWidget):
         # Node weighting
         self.weights = NodeWeights(os.path.expanduser("~/.nuke/tabtabtab_weights.json"))
         self.weights.load() # save called in close method
+
         try:
             import nuke
             nodes = find_menu_items(nuke.menu("Nodes"))
