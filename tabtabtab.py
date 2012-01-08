@@ -372,6 +372,12 @@ class TabTabTabWidget(QtGui.QWidget):
         # Up and down arrow handling
         self.input.pressed_arrow.connect(self.move_selection)
 
+    def under_cursor(self):
+        # TODO: Avoid the window going off screen when cursor is at
+        # bottom of screen
+        cursor = QtGui.QCursor().pos()
+        self.move(cursor.x() - (self.width()/2), cursor.y() - 13)
+
     def move_selection(self, where):
         if where not in ["first", "up", "down"]:
             raise ValueError("where should be either 'first', 'up', 'down', not %r" % (
@@ -438,6 +444,8 @@ def main():
         # TabTabTabWidget is instanced, it goes out of scope at end of
         # function and disappers instantly. This seems like a
         # reasonable "workaround"
+
+        _tabtabtab_instance.under_cursor()
         _tabtabtab_instance.show()
         return
 
@@ -459,8 +467,7 @@ def main():
     t = TabTabTabWidget(on_create = on_create, winflags = Qt.FramelessWindowHint)
 
     # Make dialog appear under cursor, as Nuke's builtin one does
-    cursor = QtGui.QCursor().pos()
-    t.move(cursor.x() - (t.width()/2), cursor.y() - 13)
+    t.under_cursor()
 
     # Show, and make front-most window (mostly for OS X)
     t.show()
