@@ -78,7 +78,7 @@ def nonconsec_find(needle, haystack, anchored = False):
         # "" is in "blah"
         return True
 
-    if not (" " in needle or "[" in needle):
+    if "[" not in needle:
         haystack = haystack.rpartition(" [")[0]
 
     # Turn haystack into list of characters (as strings are immutable)
@@ -144,8 +144,12 @@ class NodeModel(QtCore.QAbstractListModel):
         self.update()
 
     def update(self):
+        filtertext = self._filtertext.lower()
+
+        # Two spaces as a shortcut for [
+        filtertext = filtertext.replace("  ", "[")
         filtered = [x for x in self._all
-                    if nonconsec_find(self._filtertext.lower(), x.lower(), anchored=True)]
+                    if nonconsec_find(filtertext, x.lower(), anchored=True)]
 
         scored = [{'text': k, 'score': self.weights.get(k)} for k in filtered]
 
