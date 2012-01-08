@@ -24,11 +24,11 @@ With the default "tab thing", you press tab, start typing a node name
 (like "Blu") and you get a list of nodes that start with "Blu" (like
 "Blur"):
 
-![Nuke's builtin tab thing](imgs/nuke_tab.png)
+![Nuke's builtin tab thing](https://github.com/dbr/tabtabtab-nuke/raw/master/imgs/nuke_tab.png)
 
 "tabtabtab" works very similarly, but does substring matching:
 
-![tabtabtab](imgs/tabtabtab.png)
+![tabtabtab](https://github.com/dbr/tabtabtab-nuke/raw/master/imgs/tabtabtab.png)
 
 In this example, "tra" finds "Transform" as you'd hope, but also other
 nodes, such as "Trilinear"... This is appearing because the letters
@@ -50,6 +50,9 @@ the weight, the higher the node appears in the list.
 This means if you create lots of "Add [math]" nodes, it will be
 weighted highly, so all you might need to type is tab then "a", and it
 will be at the top of the list.
+
+The nodes weight is shown by the block to the right of the node - the
+more green, the higher the weighting
 
 ## Matching menu location
 
