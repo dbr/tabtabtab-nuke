@@ -9,8 +9,13 @@ often, it appears higher in the list than "Add 3:2 pulldown")
 
 Put tabtabtab on PYTHONPATH or NUKE_PATH somewhere (maybe in `~/.nuke/`)
 
+    mkdir -p ~/.nuke
+    cd ~/.nuke
+    curl -O https://raw.github.com/dbr/tabtabtab-nuke/master/tabtabtab.py
+
 Then to your `~/.nuke/menu.py` add:
 
+    import nuke
     import tabtabtab
     m_edit = nuke.menu("Nuke").findItem("Edit")
     m_edit.addCommand("Tabtabtab", tabtabtab.main, "Tab")
