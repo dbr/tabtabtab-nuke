@@ -1,6 +1,7 @@
 """Alternative "tab node creator thingy" for The Foundry's Nuke
 
-https://github.com/dbr/tabtabtab-nuke
+homepage: https://github.com/dbr/tabtabtab-nuke
+license: http://unlicense.org/
 """
 
 import sys
