@@ -1,4 +1,10 @@
+"""Alternative "tab node creator thingy" for The Foundry's Nuke
+
+https://github.com/dbr/tabtabtab-nuke
+"""
+
 import sys
+
 try:
     from PySide import QtCore, QtGui
     from PySide.QtCore import Qt
@@ -204,14 +210,12 @@ class NodeModel(QtCore.QAbstractListModel):
 
 
 class TabyLineEdit(QtGui.QLineEdit):
-    pressed_up = QtCore.Signal()
-    pressed_down = QtCore.Signal()
+    pressed_arrow = QtCore.Signal(str)
 
     def event(self, event):
         """Make tab trigger returnPressed
         """
 
-        #is_keypress = event.type() == QtCore.QEvent.Type.KeyPress
         is_keypress = event.type() == QtCore.QEvent.KeyPress
 
         if is_keypress and event.key() == QtCore.Qt.Key_Tab:
@@ -221,11 +225,11 @@ class TabyLineEdit(QtGui.QLineEdit):
 
         elif is_keypress and event.key() == QtCore.Qt.Key_Up:
             # These could be done in keyPressedEvent, but.. this is already here
-            self.pressed_up.emit()
+            self.pressed_arrow.emit("up")
             return True
 
         elif is_keypress and event.key() == QtCore.Qt.Key_Down:
-            self.pressed_down.emit()
+            self.pressed_arrow.emit("down")
             return True
         elif is_keypress and event.key() == QtCore.Qt.Key_Escape:
             # TODO: Emit custom signal maybe?
@@ -281,19 +285,23 @@ class TabTabTabWidget(QtGui.QWidget):
         self.input.textChanged.connect(self.update)
 
         # Reset selection on text change
-        self.input.textChanged.connect(lambda: self.move_selection(first=True))
-        self.move_selection(first = True) # Set initial selection
+        self.input.textChanged.connect(lambda: self.move_selection(where="first"))
+        self.move_selection(where = "first") # Set initial selection
 
         # When enter/tab is pressed, create node
         self.input.returnPressed.connect(self.create)
 
         # Up and down arrow handling
-        self.input.pressed_up.connect(lambda: self.move_selection(up=True))
-        self.input.pressed_down.connect(lambda: self.move_selection(down=True))
+        self.input.pressed_arrow.connect(self.move_selection)
 
-    def move_selection(self, up = False, down = False, first = False):
-        if [up, down, first].count(True) != 1:
-            raise ValueError("Specify either up, down or first")
+    def move_selection(self, where):
+        if where not in ["first", "up", "down"]:
+            raise ValueError("where should be either 'first', 'up', 'down', not %r" % (
+                    where))
+
+        first = where == "first"
+        up = where == "up"
+        down = where == "down"
 
         if first:
             self.things.setCurrentIndex(self.things_model.index(0))
