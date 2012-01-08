@@ -211,6 +211,8 @@ class NodeModel(QtCore.QAbstractListModel):
 
 class TabyLineEdit(QtGui.QLineEdit):
     pressed_arrow = QtCore.Signal(str)
+    cancelled = QtCore.Signal()
+
 
     def event(self, event):
         """Make tab trigger returnPressed
@@ -232,8 +234,7 @@ class TabyLineEdit(QtGui.QLineEdit):
             self.pressed_arrow.emit("down")
             return True
         elif is_keypress and event.key() == QtCore.Qt.Key_Escape:
-            # TODO: Emit custom signal maybe?
-            self.parent().close()
+            self.cancelled.emit()
             return True
 
         return super(TabyLineEdit, self).event(event)
@@ -290,6 +291,9 @@ class TabTabTabWidget(QtGui.QWidget):
 
         # When enter/tab is pressed, create node
         self.input.returnPressed.connect(self.create)
+
+        # When esc pressed, close
+        self.input.cancelled.connect(self.close)
 
         # Up and down arrow handling
         self.input.pressed_arrow.connect(self.move_selection)
