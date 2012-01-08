@@ -405,7 +405,13 @@ def main():
             print "creating %s" % menupath
 
     t = TabTabTabWidget(on_create = on_create, winflags = Qt.FramelessWindowHint)
-    t.show() #TODO: Make it appear under cursor like Nuke's tab thing does
+
+    # Make dialog appear under cursor, as Nuke's builtin one does
+    cursor = QtGui.QCursor().pos()
+    t.move(cursor.x() - (t.width()/2), cursor.y() - 13)
+
+    # Show, and make front-most window (mostly for OS X)
+    t.show()
     t.raise_()
 
     _tabtabtab_instance = t
