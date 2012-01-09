@@ -70,3 +70,19 @@ the menu location (the part in "[...]")
 For example, "ax" matches "AddMix [Merge]" and "Axis [3D]". If you
 type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
 [3D]"
+
+## Change log
+
+* `v1.0`
+  * Basically working
+
+* `v1.1`
+  * Node weights are saved
+
+* `v1.2`
+  * Window appears under cursor
+
+* `v1.3`
+  * Created node remains selected between tab's, meaning "tabtab" creates the previously node
+  * Clicking a node in the list creates it
+  * Window doesn't go offscreen if cursor is near edge
