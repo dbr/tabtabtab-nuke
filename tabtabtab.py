@@ -364,9 +364,9 @@ class TabTabTabWidget(QtGui.QWidget):
         self.input.textChanged.connect(lambda: self.move_selection(where="first"))
         self.move_selection(where = "first") # Set initial selection
 
-        # When enter/tab is pressed, create node
+        # Create node when enter/tab is pressed, or item is clicked
         self.input.returnPressed.connect(self.create)
-        # TODO: Do same thing when clicked
+        self.things.clicked.connect(self.create)
 
         # When esc pressed, close
         self.input.cancelled.connect(self.close)
@@ -423,6 +423,7 @@ class TabTabTabWidget(QtGui.QWidget):
         create previously created node (instead of the most popular)
         """
         self.input.selectAll()
+        self.input.setFocus()
         super(TabTabTabWidget, self).show()
 
     def close(self):
