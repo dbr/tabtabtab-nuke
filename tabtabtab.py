@@ -410,15 +410,18 @@ class TabTabTabWidget(QtGui.QWidget):
             return super(TabTabTabWidget, self).event(event)
 
     def update(self, text):
+        """On text change, selects first item and updates filter text
+        """
         self.things.setCurrentIndex(self.things_model.index(0))
         self.things_model.set_filter(text)
 
     def show(self):
-        """Leaves previous user-input untouched, but selects text.
+        """Select all the text in the input (which persists between
+        show()'s)
 
-        Means "[tab][tab]" creates previously used node, not the most popular
+        Allows typing over previously created text, and [tab][tab] to
+        create previously created node (instead of the most popular)
         """
-
         self.input.selectAll()
         super(TabTabTabWidget, self).show()
 
@@ -435,6 +438,10 @@ class TabTabTabWidget(QtGui.QWidget):
             return
 
         thing = self.things_model.getorig(selected)
+
+        # Store the full UI name of the created node, so it is the
+        # active node on the next [tab]
+        self.input.setText(thing['text'])
 
         # Get Nuke menu path of selected
         menupath = thing['menupath']
