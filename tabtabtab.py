@@ -17,6 +17,7 @@ except ImportError:
 
     from PyQt4 import QtCore, QtGui
     from PyQt4.QtCore import Qt
+    QtCore.Signal = QtCore.pyqtSignal
 
 
 def find_menu_items(menu, _path = None):
