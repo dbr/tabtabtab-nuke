@@ -365,6 +365,7 @@ class TabTabTabWidget(QtGui.QWidget):
 
         # When enter/tab is pressed, create node
         self.input.returnPressed.connect(self.create)
+        # TODO: Do same thing when clicked
 
         # When esc pressed, close
         self.input.cancelled.connect(self.close)
