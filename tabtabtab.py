@@ -457,13 +457,8 @@ def main():
 
         _tabtabtab_instance.under_cursor()
         _tabtabtab_instance.show()
+        _tabtabtab_instance.raise_()
         return
-
-    try:
-        # For testing outside Nuke
-        app = QtGui.QApplication(sys.argv)
-    except RuntimeError:
-        app = None
 
     def on_create(menupath):
         try:
@@ -485,9 +480,6 @@ def main():
 
     _tabtabtab_instance = t
 
-    if app is not None:
-        app.exec_()
-
 
 if __name__ == '__main__':
     try:
@@ -495,4 +487,11 @@ if __name__ == '__main__':
         m_edit = nuke.menu("Nuke").findItem("Edit")
         m_edit.addCommand("Tabtabtab", main, "Tab")
     except ImportError:
-        main()
+        # For testing outside Nuke
+        app = QtGui.QApplication(sys.argv)
+        while True:
+            main()
+            r = raw_input()
+            if r.strip() == "q":
+                break
+        app.exec_()
