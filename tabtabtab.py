@@ -411,10 +411,18 @@ class TabTabTabWidget(QtGui.QWidget):
         self.things.setCurrentIndex(self.things_model.index(0))
         self.things_model.set_filter(text)
 
-    def close(self):
-        """Clear current input when closing
+    def show(self):
+        """Leaves previous user-input untouched, but selects text.
+
+        Means "[tab][tab]" creates previously used node, not the most popular
         """
-        self.input.setText("")
+
+        self.input.selectAll()
+        super(TabTabTabWidget, self).show()
+
+    def close(self):
+        """Save weights when closing
+        """
         self.weights.save()
         super(TabTabTabWidget, self).close()
 
