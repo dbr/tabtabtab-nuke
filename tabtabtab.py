@@ -375,10 +375,23 @@ class TabTabTabWidget(QtGui.QWidget):
         self.input.pressed_arrow.connect(self.move_selection)
 
     def under_cursor(self):
-        # TODO: Avoid the window going off screen when cursor is at
-        # bottom of screen
+        def clamp(val, mi, ma):
+            return max(min(val, ma), mi)
+
+        # Get cursor position, and screen dimensions on active screen
         cursor = QtGui.QCursor().pos()
-        self.move(cursor.x() - (self.width()/2), cursor.y() - 13)
+        screen = QtGui.QDesktopWidget().screenGeometry(cursor)
+
+        # Get window position so cursor is just over text input
+        xpos = cursor.x() - (self.width()/2)
+        ypos = cursor.y() - 13
+
+        # Clamp window location to prevent it going offscreen
+        xpos = clamp(xpos, screen.left(), screen.right() - self.width())
+        ypos = clamp(ypos, screen.top(), screen.bottom() - (self.height()-13))
+
+        # Move window
+        self.move(xpos, ypos)
 
     def move_selection(self, where):
         if where not in ["first", "up", "down"]:
