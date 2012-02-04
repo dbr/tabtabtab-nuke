@@ -117,7 +117,7 @@ def nonconsec_find(needle, haystack, anchored = False):
 class NodeWeights(object):
     def __init__(self, fname = None):
         self.fname = fname
-        self.weights = {}
+        self._weights = {}
 
     def load(self):
         if self.fname is None:
@@ -129,7 +129,7 @@ class NodeWeights(object):
                 print "Weight file does not exist"
                 return
             f = open(self.fname)
-            self.weights = json.load(f)
+            self._weights = json.load(f)
             f.close()
 
         # Catch any errors, print traceback and continue
@@ -157,7 +157,7 @@ class NodeWeights(object):
 
             f = open(self.fname, "w")
             # TODO: Limit number of saved items to some sane number
-            json.dump(self.weights, fp = f)
+            json.dump(self._weights, fp = f)
             f.close()
 
         # Catch any errors, print traceback and continue
@@ -169,17 +169,18 @@ class NodeWeights(object):
             traceback.print_exc()
 
     def get(self, k, default = 0):
-        if len(self.weights.values()) == 0:
+        if len(self._weights.values()) == 0:
             maxval = 1.0
         else:
-            maxval = max(self.weights.values())
+            maxval = max(self._weights.values())
             maxval = max(1, maxval)
             maxval = float(maxval)
-        return self.weights.get(k, default) / maxval
+
+        return self._weights.get(k, default) / maxval
 
     def increment(self, key):
-        self.weights.setdefault(key, 0)
-        self.weights[key] += 1
+        self._weights.setdefault(key, 0)
+        self._weights[key] += 1
 
 
 class NodeModel(QtCore.QAbstractListModel):
