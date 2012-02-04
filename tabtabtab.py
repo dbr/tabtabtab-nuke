@@ -173,7 +173,7 @@ class NodeWeights(object):
             maxval = 1.0
         else:
             maxval = max(self.weights.values())
-            maxval = min(1, maxval)
+            maxval = max(1, maxval)
             maxval = float(maxval)
         return self.weights.get(k, default) / maxval
 
