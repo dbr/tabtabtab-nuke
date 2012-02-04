@@ -183,7 +183,7 @@ class NodeWeights(object):
 
 
 class NodeModel(QtCore.QAbstractListModel):
-    def __init__(self, mlist, weights, num_items = 20, filtertext = ""):
+    def __init__(self, mlist, weights, num_items = 15, filtertext = ""):
         super(NodeModel, self).__init__()
 
         self.weights = weights
