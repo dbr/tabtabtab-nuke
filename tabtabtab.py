@@ -445,8 +445,15 @@ class TabTabTabWidget(QtGui.QWidget):
         Allows typing over previously created text, and [tab][tab] to
         create previously created node (instead of the most popular)
         """
+
+        # Load the weights everytime the panel is shown, to prevent
+        # overwritting weights from other Nuke instances
+        self.weights.load()
+
+        # Select all text to allow overwriting
         self.input.selectAll()
         self.input.setFocus()
+
         super(TabTabTabWidget, self).show()
 
     def close(self):
