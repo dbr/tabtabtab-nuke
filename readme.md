@@ -86,3 +86,8 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Created node remains selected between tab's, meaning "tabtab" creates the previously node
   * Clicking a node in the list creates it
   * Window doesn't go offscreen if cursor is near edge
+
+* `dev version`
+  * Cycling with up/down arrows works works properly
+  * Remove vertical scrollbar (reduced number of shown items)
+  * Node weights are loaded on every invokation, preventing overwriting of values with multiple Nuke instances
