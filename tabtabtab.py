@@ -410,9 +410,15 @@ class TabTabTabWidget(QtGui.QWidget):
 
         cur = self.things.currentIndex()
         if up:
-            new = max(0, cur.row() - 1)
+            new = cur.row() - 1
+            if new < 0:
+                new = self.things_model.rowCount() - 1
         elif down:
-            new = min(self.things_model.rowCount(), cur.row() + 1)
+            new = cur.row() + 1
+            count = self.things_model.rowCount()
+            if new > count-1:
+                new = 0
+
         self.things.setCurrentIndex(self.things_model.index(new))
 
     def event(self, event):
