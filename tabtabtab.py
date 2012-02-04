@@ -240,16 +240,14 @@ class NodeModel(QtCore.QAbstractListModel):
             weight = self._items[index.row()]['score']
 
             hue = 0.4
-            sat = weight ** 2 # gamma saturation to make faster falloff
-
-            sat = min(1.0, sat)
+            sat = weight
 
             if index.row() % 2 == 0:
                 col = QtGui.QColor.fromHsvF(hue, sat, 0.9)
             else:
                 col = QtGui.QColor.fromHsvF(hue, sat, 0.8)
 
-            pix = QtGui.QPixmap(12, 12)
+            pix = QtGui.QPixmap(6, 12)
             pix.fill(col)
             return pix
 
