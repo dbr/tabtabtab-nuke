@@ -293,6 +293,8 @@ class TabyLineEdit(QtGui.QLineEdit):
 
     def event(self, event):
         """Make tab trigger returnPressed
+
+        Also emit signals for the up/down arrows, and escape.
         """
 
         is_keypress = event.type() == QtCore.QEvent.KeyPress
