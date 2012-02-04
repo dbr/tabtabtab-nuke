@@ -526,9 +526,5 @@ if __name__ == '__main__':
     except ImportError:
         # For testing outside Nuke
         app = QtGui.QApplication(sys.argv)
-        while True:
-            main()
-            r = raw_input()
-            if r.strip() == "q":
-                break
+        main()
         app.exec_()
