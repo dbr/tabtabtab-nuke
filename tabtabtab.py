@@ -487,7 +487,7 @@ def main():
         try:
             import nuke
             m = nuke.menu("Nodes")
-            mitem = m.findItem(menupath) # FIXME: Mismatch caused by find_menu_items
+            mitem = m.findItem(menupath)
             mitem.invoke()
         except ImportError:
             print "creating %s" % menupath
