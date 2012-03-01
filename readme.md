@@ -83,7 +83,8 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Window appears under cursor
 
 * `v1.3`
-  * Created node remains selected between tab's, meaning "tabtab" creates the previously node
+  * Created node remains selected between tab's, meaning "tabtab"
+    creates the previously node
   * Clicking a node in the list creates it
   * Window doesn't go offscreen if cursor is near edge
 
