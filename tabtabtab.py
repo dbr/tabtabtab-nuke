@@ -4,7 +4,7 @@ homepage: https://github.com/dbr/tabtabtab-nuke
 license: http://unlicense.org/
 """
 
-__version__ = (1, 3)
+__version__ = (1, 4)
 
 import os
 import sys
