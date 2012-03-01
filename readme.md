@@ -23,6 +23,26 @@ Then to your `~/.nuke/menu.py` add:
 This replaces the builtin tab shortcut (you can change the last "Tab"
 argument to another shortcut if you wish)
 
+## Notes
+
+This requires Nuke 6.3v5 or higher (for the integrated PySide module)
+
+For older versions of 6.3, you must have
+[a custom PyQt installation][pyqtinstall]. For 6.2, see
+[Dylan Palmboom's tabtabtabLegacy fork][legacy], which may also work
+in even more ancient version.
+
+[pyqtinstall]: http://docs.thefoundry.co.uk/nuke/63/pythondevguide/custom_panels.html#extending-nuke-with-pyqt
+[legacy]: http://www.nukepedia.com/gizmos/python-scripts/ui/tabtabtablegacy/
+
+Relevant Foundry bug-id's:
+
+* Bug #23576, "Segmentation Fault on Nuke exit after using a custom
+PySide window" (causes a mostly harmless "Segmentation fault" message
+on exiting Nuke)
+
+* Feature #11662 to get this functionality integrated into Nuke
+
 ## More elabourate description
 
 With the default "tab thing", you press tab, start typing a node name
