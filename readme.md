@@ -88,7 +88,17 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Clicking a node in the list creates it
   * Window doesn't go offscreen if cursor is near edge
 
-* `dev version`
-  * Cycling with up/down arrows works works properly
-  * Remove vertical scrollbar (reduced number of shown items)
-  * Node weights are loaded on every invokation, preventing overwriting of values with multiple Nuke instances
+* `v1.4`
+
+  * Blocks Nuke UI when active. This greatly improves usability when
+    the weights are slow to load (e.g in heavy Nuke script, or slow
+    home-dir access), as it prevents key-presses intended for
+    tabtabtab from being handled by Nuke (possibly creating
+    new/modifying nodes etc)
+  * Up/down arrow keys cycle correctly
+  * Indicator blocks now actually indicate node weights, instead of
+    always being green. The blocks are also now narrower, which looks
+    nicer
+  * Prevent vertical scrollbar (reduced number of shown items to 15)
+  * Node weights are loaded on every invokation, preventing
+    overwriting of values with multiple Nuke instances
