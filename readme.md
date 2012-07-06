@@ -37,7 +37,7 @@ in even more ancient version.
 
 Relevant Foundry bug-id's:
 
-* Bug #23576, "Segmentation Fault on Nuke exit after using a custom
+* [Fixed in Nuke 6.3v8] Bug #23576, "Segmentation Fault on Nuke exit after using a custom
 PySide window" (causes a mostly harmless "Segmentation fault" message
 on exiting Nuke)
 
@@ -122,3 +122,8 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Prevent vertical scrollbar (reduced number of shown items to 15)
   * Node weights are loaded on every invokation, preventing
     overwriting of values with multiple Nuke instances
+
+* `v1.5`
+
+  * Fixes crash-on-exit for Nuke 6.3v8 (as Nuke bug #23576 is closed)
+  * Window now closes properly
