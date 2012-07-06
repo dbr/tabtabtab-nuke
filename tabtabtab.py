@@ -516,7 +516,11 @@ def main():
     t.show()
     t.raise_()
 
-    _tabtabtab_instance = t
+    # Keep the TabTabTabWidget alive, but don't keep an extra
+    # reference to it, otherwise Nuke segfaults on exit. Hacky.
+    # https://github.com/dbr/tabtabtab-nuke/issues/4
+    import weakref
+    _tabtabtab_instance = weakref.proxy(t)
 
 
 if __name__ == '__main__':
