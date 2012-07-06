@@ -454,7 +454,7 @@ class TabTabTabWidget(QtGui.QDialog):
         self.input.selectAll()
         self.input.setFocus()
 
-        super(TabTabTabWidget, self).exec_()
+        super(TabTabTabWidget, self).show()
 
     def close(self):
         """Save weights when closing
