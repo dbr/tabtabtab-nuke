@@ -316,7 +316,8 @@ class TabyLineEdit(QtGui.QLineEdit):
             self.cancelled.emit()
             return True
 
-        return super(TabyLineEdit, self).event(event)
+        else:
+            return super(TabyLineEdit, self).event(event)
 
 
 class TabTabTabWidget(QtGui.QDialog):
@@ -336,7 +337,7 @@ class TabTabTabWidget(QtGui.QDialog):
 
         # Node weighting
         self.weights = NodeWeights(os.path.expanduser("~/.nuke/tabtabtab_weights.json"))
-        self.weights.load() # save called in close method
+        self.weights.load() # weights.save() called in close method
 
         try:
             import nuke
