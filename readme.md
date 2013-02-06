@@ -15,10 +15,16 @@ Put tabtabtab on PYTHONPATH or NUKE_PATH somewhere (maybe in `~/.nuke/`)
 
 Then to your `~/.nuke/menu.py` add:
 
-    import nuke
-    import tabtabtab
-    m_edit = nuke.menu("Nuke").findItem("Edit")
-    m_edit.addCommand("Tabtabtab", tabtabtab.main, "Tab")
+    def ttt():
+        import tabtabtab
+        m_edit = nuke.menu("Nuke").findItem("Edit")
+        m_edit.addCommand("Tabtabtab", tabtabtab.main, "Tab")
+
+    try:
+        ttt()
+    except Exception:
+        import traceback
+        traceback.print_exc()
 
 This replaces the builtin tab shortcut (you can change the last "Tab"
 argument to another shortcut if you wish)
