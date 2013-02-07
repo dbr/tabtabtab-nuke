@@ -4,7 +4,7 @@ homepage: https://github.com/dbr/tabtabtab-nuke
 license: http://unlicense.org/
 """
 
-__version__ = (1, 5)
+__version__ = (1, 6, "dev")
 
 import os
 import sys
@@ -79,6 +79,17 @@ def nonconsec_find(needle, haystack, anchored = False):
     False
     >>> nonconsec_find("match", "matchmove", anchored = True)
     True
+
+    If needle starts with a string, non-consecutive searching is disabled:
+
+    >>> nonconsec_find(" mt", "matchmove", anchored = True)
+    False
+    >>> nonconsec_find(" ma", "matchmove", anchored = True)
+    True
+    >>> nonconsec_find(" oe", "matchmove", anchored = False)
+    False
+    >>> nonconsec_find(" ov", "matchmove", anchored = False)
+    True
     """
 
     if len(haystack) == 0 and len(needle) > 0:
@@ -94,6 +105,15 @@ def nonconsec_find(needle, haystack, anchored = False):
 
     # Turn haystack into list of characters (as strings are immutable)
     haystack = [hay for hay in str(haystack)]
+
+    if needle.startswith(" "):
+        # "[space]abc" does consecutive search for "abc" in "abcdef"
+        if anchored:
+            if "".join(haystack).startswith(needle.lstrip(" ")):
+                return True
+        else:
+            if needle.lstrip(" ") in "".join(haystack):
+                return True
 
     if anchored:
         if needle[0] != haystack[0]:
