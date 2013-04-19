@@ -55,7 +55,7 @@ def find_menu_items(menu, _path = None):
                 continue
 
             subpath = "/".join(x for x in (_path, i.name()) if x is not None)
-            found.append(subpath)
+            found.append({'menuobj': i, 'menupath': subpath})
 
     return found
 
@@ -230,15 +230,17 @@ class NodeModel(QtCore.QAbstractListModel):
         scored = []
         for n in self._all:
             # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
-            uiname = "%s [%s]" % (n.rpartition("/")[2], n.rpartition("/")[0])
+            menupath = n['menupath'].replace("&", "")
+            uiname = "%s [%s]" % (menupath.rpartition("/")[2], menupath.rpartition("/")[0])
 
             if nonconsec_find(filtertext, uiname.lower(), anchored=True):
                 # Matches, get weighting and add to list of stuff
-                score = self.weights.get(n)
+                score = self.weights.get(n['menupath'])
 
                 scored.append({
                         'text': uiname,
-                        'menupath': n,
+                        'menupath': n['menupath'],
+                        'menuobj': n['menuobj'],
                         'score': score})
 
         # Store based on scores (descending), then alphabetically
@@ -359,13 +361,8 @@ class TabTabTabWidget(QtGui.QDialog):
         self.weights = NodeWeights(os.path.expanduser("~/.nuke/tabtabtab_weights.json"))
         self.weights.load() # weights.save() called in close method
 
-        try:
-            import nuke
-            nodes = find_menu_items(nuke.menu("Nodes"))
-        except ImportError:
-            # FIXME: For testing outside Nuke, should be refactored
-            import data_test
-            nodes = data_test.menu_items
+        import nuke
+        nodes = find_menu_items(nuke.menu("Nodes")) + find_menu_items(nuke.menu("Nuke"))
 
         # List of stuff, and associated model
         self.things_model = NodeModel(nodes, weights = self.weights)
@@ -494,12 +491,9 @@ class TabTabTabWidget(QtGui.QDialog):
         # active node on the next [tab]
         self.input.setText(thing['text'])
 
-        # Get Nuke menu path of selected
-        menupath = thing['menupath']
-
         # Create node, increment weight and close
-        self.cb_on_create(menupath = menupath)
-        self.weights.increment(menupath)
+        self.cb_on_create(thing = thing)
+        self.weights.increment(thing['menupath'])
         self.close()
 
 
@@ -518,14 +512,11 @@ def main():
         _tabtabtab_instance.raise_()
         return
 
-    def on_create(menupath):
+    def on_create(thing):
         try:
-            import nuke
-            m = nuke.menu("Nodes")
-            mitem = m.findItem(menupath)
-            mitem.invoke()
+            thing['menuobj'].invoke()
         except ImportError:
-            print "creating %s" % menupath
+            print "Error creating %s" % thing
 
     t = TabTabTabWidget(on_create = on_create, winflags = Qt.FramelessWindowHint)
 
