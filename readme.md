@@ -134,7 +134,7 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Fixes crash-on-exit for Nuke 6.3v8 (as Nuke bug #23576 is closed)
   * Window now closes properly
 
-* `v1.6` (in development)
+* `v1.6`
 
   * Code to add to `menu.py` more robust, so tabtabtab errors will
     never prevent Nuke from starting
