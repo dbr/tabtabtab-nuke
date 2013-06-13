@@ -55,11 +55,11 @@ With the default "tab thing", you press tab, start typing a node name
 (like "Blu") and you get a list of nodes that start with "Blu" (like
 "Blur"):
 
-![Nuke's builtin tab thing](https://github.com/dbr/tabtabtab-nuke/raw/master/imgs/nuke_tab.png)
+![Nuke's builtin tab thing](imgs/nuke_tab.png)
 
 "tabtabtab" works very similarly, but does substring matching:
 
-![tabtabtab](https://github.com/dbr/tabtabtab-nuke/raw/master/imgs/tabtabtab.png)
+![tabtabtab](imgs/tabtabtab.png)
 
 In this example, "tra" finds "Transform" as you'd hope, but also other
 nodes, such as "Trilinear"... This is appearing because the letters
