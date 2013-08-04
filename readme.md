@@ -26,8 +26,10 @@ Then to your `~/.nuke/menu.py` add:
         import traceback
         traceback.print_exc()
 
-This replaces the builtin tab shortcut (you can change the last "Tab"
-argument to another shortcut if you wish)
+
+The original menu will still be available via "Ctrl+Tab". You can
+change the last "Tab" argument to another shortcut if you wish.
+
 
 ## Notes
 
