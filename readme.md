@@ -148,3 +148,9 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Exposes menu items in `nuke.menu("Nuke")` along with the nodes.
     Meaning items in the "File" menu etc are exposed, for example
     `[tab]exit` will be the same as "File > Exit"
+
+* `v1.7` (wip)
+
+  * `ToolSets/Delete` submenu is excluded from tabtabtab
+
+  * Document that `Ctrl+Tab` opens the original tab menu
