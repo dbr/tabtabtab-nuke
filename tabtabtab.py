@@ -44,6 +44,11 @@ def find_menu_items(menu, _path = None):
             # Sub-menu, recurse
             mname = i.name().replace("&", "")
             subpath = "/".join(x for x in (_path, mname) if x is not None)
+
+            if "ToolSets/Delete" in subpath:
+                # Remove all ToolSets delete commands
+                continue
+
             sub_found = find_menu_items(menu = i, _path = subpath)
             found.extend(sub_found)
         elif isinstance(i, nuke.MenuItem):
