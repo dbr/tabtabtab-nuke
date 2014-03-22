@@ -149,7 +149,7 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
     Meaning items in the "File" menu etc are exposed, for example
     `[tab]exit` will be the same as "File > Exit"
 
-* `v1.7` (wip)
+* `v1.7`
 
   * `ToolSets/Delete` submenu is excluded from tabtabtab.
     [Github issue #6](https://github.com/dbr/tabtabtab-nuke/issues/6)
