@@ -97,6 +97,9 @@ def nonconsec_find(needle, haystack, anchored = False):
     True
     """
 
+    if "[" not in needle:
+        haystack = haystack.rpartition(" [")[0]
+
     if len(haystack) == 0 and len(needle) > 0:
         # "a" is not in ""
         return False
@@ -105,8 +108,10 @@ def nonconsec_find(needle, haystack, anchored = False):
         # "" is in "blah"
         return True
 
-    if "[" not in needle:
-        haystack = haystack.rpartition(" [")[0]
+    elif len(needle) == 0 and len(haystack) == 0:
+        # ..?
+        return True
+
 
     # Turn haystack into list of characters (as strings are immutable)
     haystack = [hay for hay in str(haystack)]
