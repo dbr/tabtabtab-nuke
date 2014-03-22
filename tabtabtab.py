@@ -498,8 +498,14 @@ class TabTabTabWidget(QtGui.QDialog):
         thing = self.things_model.getorig(selected)
 
         # Store the full UI name of the created node, so it is the
-        # active node on the next [tab]
-        self.input.setText(thing['text'])
+        # active node on the next [tab]. Prefix it with space,
+        # to disable substring matching
+        if thing['text'].startswith(" "):
+            prev_string = thing['text']
+        else:
+            prev_string = " %s" % thing['text']
+
+        self.input.setText(prev_string)
 
         # Create node, increment weight and close
         self.cb_on_create(thing = thing)
