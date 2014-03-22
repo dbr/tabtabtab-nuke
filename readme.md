@@ -151,6 +151,15 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
 
 * `v1.7` (wip)
 
-  * `ToolSets/Delete` submenu is excluded from tabtabtab
+  * `ToolSets/Delete` submenu is excluded from tabtabtab.
+    [Github issue #6](https://github.com/dbr/tabtabtab-nuke/issues/6)
 
   * Document that `Ctrl+Tab` opens the original tab menu
+
+  * Fixed bug which caused the node list to stop updating
+
+    [Github issue #10](https://github.com/dbr/tabtabtab-nuke/issues/10)
+
+  * Fixed bug where "last used node" might have matched a different
+    node (contrived example: the restored `Blur [Filter]` search text
+    might have matched the more highly weighted `Blur2 [Filter]`)
