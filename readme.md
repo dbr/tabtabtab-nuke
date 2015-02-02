@@ -17,8 +17,8 @@ Then to your `~/.nuke/menu.py` add:
 
     def ttt():
         import tabtabtab
-        m_edit = nuke.menu("Nuke").findItem("Edit")
-        m_edit.addCommand("Tabtabtab", tabtabtab.main, "Tab")
+        m_graph = nuke.menu("Node Graph")
+        m_graph.addCommand("Tabtabtab", tabtabtab.main, "Tab")
 
     try:
         ttt()
