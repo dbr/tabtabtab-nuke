@@ -51,6 +51,11 @@ on exiting Nuke)
 
 * Feature #11662 to get this functionality integrated into Nuke
 
+In order to support Nuke 9, you need to use a different snippet in
+your `menu.py`, adding the tabtabtab call to the `Node Graph` instead
+of the Edit menu (see the updated installation instructions). The
+same snippet works in older verisons of Nuke.
+
 ## More elabourate description
 
 With the default "tab thing", you press tab, start typing a node name
@@ -163,3 +168,7 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Fixed bug where "last used node" might have matched a different
     node (contrived example: the restored `Blur [Filter]` search text
     might have matched the more highly weighted `Blur2 [Filter]`)
+
+* `v1.8` (wip)
+
+  * Installation instructions updated to support Nuke 9
