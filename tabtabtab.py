@@ -180,7 +180,7 @@ class NodeWeights(object):
             ndir = os.path.dirname(self.fname)
             if not os.path.isdir(ndir):
                 try:
-                    os.makedir(ndir)
+                    os.makedirs(ndir)
                 except OSError, e:
                     if e.errno != 17: # errno 17 is "already exists"
                         raise
