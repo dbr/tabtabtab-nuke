@@ -148,6 +148,7 @@ class NodeWeights(object):
     def __init__(self, fname = None):
         self.fname = fname
         self._weights = {}
+        self._successful_load = False
 
     def load(self):
         if self.fname is None:
@@ -165,14 +166,22 @@ class NodeWeights(object):
         # Catch any errors, print traceback and continue
         try:
             _load_internal()
+            self._successful_load = True
         except Exception:
             print "Error loading node weights"
             import traceback
             traceback.print_exc()
+            self._successful_load = False
 
     def save(self):
         if self.fname is None:
             print "Not saving node weights, no file specified"
+            return
+
+        if self._successful_load:
+            # Avoid clobbering existing weights file on load error
+            print "Not writing weights file because %r previously failed to load" % (
+                self.fname)
             return
 
         def _save_internal():
