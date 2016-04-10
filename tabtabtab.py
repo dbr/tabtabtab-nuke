@@ -178,7 +178,7 @@ class NodeWeights(object):
             print "Not saving node weights, no file specified"
             return
 
-        if self._successful_load:
+        if not self._successful_load:
             # Avoid clobbering existing weights file on load error
             print "Not writing weights file because %r previously failed to load" % (
                 self.fname)
