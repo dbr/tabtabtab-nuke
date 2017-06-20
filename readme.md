@@ -176,3 +176,5 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
   * Weights file no longer overwritten if it fails to load for some
     reason.
     [Github issue #13](https://github.com/dbr/tabtabtab-nuke/issues/13)
+    
+  * Support PySide2
