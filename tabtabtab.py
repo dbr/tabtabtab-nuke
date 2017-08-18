@@ -100,7 +100,8 @@ def nonconsec_find(needle, haystack, anchored = False):
     >>> nonconsec_find(" ov", "matchmove", anchored = False)
     True
     """
-
+    
+    needle = unicode(needle).encode('UTF-8')
     if "[" not in needle:
         haystack = haystack.rpartition(" [")[0]
 
