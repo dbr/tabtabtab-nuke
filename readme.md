@@ -27,6 +27,14 @@ Then to your `~/.nuke/menu.py` add:
         traceback.print_exc()
 
 
+
+or add: 
+```python
+nuke.pluginAddPath('tabtabtab')
+```
+to your `~/.nuke/init.py`, the `tabtabtab` should be your repo path.
+
+
 The original menu will still be available via "Ctrl+Tab". You can
 change the last "Tab" argument to another shortcut if you wish.
 
