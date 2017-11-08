@@ -243,31 +243,56 @@ class NodeModel(QtCore.QAbstractListModel):
     def set_filter(self, filtertext):
         self._filtertext = filtertext
         self.update()
-
+        
     def update(self):
         filtertext = self._filtertext.lower()
 
         # Two spaces as a shortcut for [
         filtertext = filtertext.replace("  ", "[")
 
-        scored = []
+        scored_a = []
+        scored_b = []
+        scored_c = []
         for n in self._all:
             # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
             menupath = n['menupath'].replace("&", "")
             uiname = "%s [%s]" % (menupath.rpartition("/")[2], menupath.rpartition("/")[0])
 
-            if nonconsec_find(filtertext, uiname.lower(), anchored=True):
+            if uiname.lower().startswith(filtertext):
                 # Matches, get weighting and add to list of stuff
                 score = self.weights.get(n['menupath'])
 
-                scored.append({
+                scored_a.append({
+                        'text': uiname,
+                        'menupath': n['menupath'],
+                        'menuobj': n['menuobj'],
+                        'score': score})   
+
+            elif nonconsec_find(filtertext, uiname.lower(), anchored=True):
+                # Matches, get weighting and add to list of stuff
+                score = self.weights.get(n['menupath'])
+
+                scored_b.append({
+                        'text': uiname,
+                        'menupath': n['menupath'],
+                        'menuobj': n['menuobj'],
+                        'score': score})
+
+            elif nonconsec_find(filtertext, uiname.lower(), anchored=False):
+                # Matches, get weighting and add to list of stuff
+                score = self.weights.get(n['menupath'])
+
+                scored_c.append({
                         'text': uiname,
                         'menupath': n['menupath'],
                         'menuobj': n['menuobj'],
                         'score': score})
 
         # Store based on scores (descending), then alphabetically
-        s = sorted(scored, key = lambda k: (-k['score'], k['text']))
+        sort_a = sorted(scored_a, key = lambda k: (-k['score'], k['text']))
+        sort_b = sorted(scored_b, key = lambda k: (-k['score'], k['text']))
+        sort_c = sorted(scored_c, key = lambda k: (-k['score'], k['text']))
+        s = sort_a + sort_b + sort_c
 
         self._items = s
         self.modelReset.emit()
