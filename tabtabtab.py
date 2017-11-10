@@ -257,8 +257,9 @@ class NodeModel(QtCore.QAbstractListModel):
             # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
             menupath = n['menupath'].replace("&", "")
             uiname = "%s [%s]" % (menupath.rpartition("/")[2], menupath.rpartition("/")[0])
+            stripped_name = uiname.replace(' ','').replace('-','').replace('_','')
 
-            if uiname.lower().startswith(filtertext):
+            if uiname.lower().startswith(filtertext) or stripped_name.startswith(filtertext):
                 # Matches, get weighting and add to list of stuff
                 score = self.weights.get(n['menupath'])
 
