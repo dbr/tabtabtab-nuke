@@ -69,6 +69,27 @@ def find_menu_items(menu, _path = None):
     return found
 
 
+def consec_find(needle, haystack, anchored = False):
+    ''' searches for the "needle" string in the "haystack" string.
+        added to tabtabtab as a way to prioritize more relevant results.
+    '''
+
+    if "[" not in needle:
+        haystack = haystack.rpartition(" [")[0]
+
+    stripped_haystack = haystack.replace(' ','').replace('-','').replace('_','')
+
+    if anchored:
+        if haystack.startswith(needle) or stripped_haystack.startswith(needle):
+            return True
+
+    else:
+        if needle in haystack or needle in stripped_haystack:
+            return True
+    return False
+
+    
+
 def nonconsec_find(needle, haystack, anchored = False):
     """checks if each character of "needle" can be found in order (but not
     necessarily consecutivly) in haystack.
@@ -227,7 +248,7 @@ class NodeWeights(object):
 
 
 class NodeModel(QtCore.QAbstractListModel):
-    def __init__(self, mlist, weights, num_items = 15, filtertext = ""):
+    def __init__(self, mlist, weights, num_items = 18, filtertext = ""):
         super(NodeModel, self).__init__()
 
         self.weights = weights
@@ -249,17 +270,30 @@ class NodeModel(QtCore.QAbstractListModel):
 
         # Two spaces as a shortcut for [
         filtertext = filtertext.replace("  ", "[")
+        
+        anchored = True
+        force_non_anchored = False
+        # Starting the string with * or [ disables anchoring.
+        # Starting with ** forces non anchored results
+        if filtertext.startswith('*') or filtertext.startswith('['):
+            anchored = False
+            filtertext = filtertext.replace("*", "", 1)
+            if filtertext.startswith('*'):
+                force_non_anchored = True
+            filtertext = filtertext.replace("*", "")
 
         scored_a = []
         scored_b = []
-        scored_c = []
         for n in self._all:
             # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
             menupath = n['menupath'].replace("&", "")
             uiname = "%s [%s]" % (menupath.rpartition("/")[2], menupath.rpartition("/")[0])
-            stripped_name = uiname.replace(' ','').replace('-','').replace('_','')
+            search_string = uiname.lower()
 
-            if uiname.lower().startswith(filtertext) or stripped_name.startswith(filtertext):
+            if force_non_anchored:
+                search_string = search_string[1:]      
+            
+            if consec_find(filtertext, search_string, anchored):
                 # Matches, get weighting and add to list of stuff
                 score = self.weights.get(n['menupath'])
 
@@ -269,7 +303,7 @@ class NodeModel(QtCore.QAbstractListModel):
                         'menuobj': n['menuobj'],
                         'score': score})   
 
-            elif nonconsec_find(filtertext, uiname.lower(), anchored=True):
+            elif nonconsec_find(filtertext, search_string, anchored):
                 # Matches, get weighting and add to list of stuff
                 score = self.weights.get(n['menupath'])
 
@@ -279,21 +313,10 @@ class NodeModel(QtCore.QAbstractListModel):
                         'menuobj': n['menuobj'],
                         'score': score})
 
-            elif nonconsec_find(filtertext, uiname.lower(), anchored=False):
-                # Matches, get weighting and add to list of stuff
-                score = self.weights.get(n['menupath'])
-
-                scored_c.append({
-                        'text': uiname,
-                        'menupath': n['menupath'],
-                        'menuobj': n['menuobj'],
-                        'score': score})
-
-        # Store based on scores (descending), then alphabetically
+        # Sort based on scores (descending), then alphabetically
         sort_a = sorted(scored_a, key = lambda k: (-k['score'], k['text']))
         sort_b = sorted(scored_b, key = lambda k: (-k['score'], k['text']))
-        sort_c = sorted(scored_c, key = lambda k: (-k['score'], k['text']))
-        s = sort_a + sort_b + sort_c
+        s = sort_a + sort_b
 
         self._items = s
         self.modelReset.emit()
