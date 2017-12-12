@@ -449,6 +449,11 @@ class TabTabTabWidget(QtWidgets.QDialog):
             count = self.things_model.rowCount()
             if new > count-1:
                 new = 0
+        else:
+            # TODO: Figure out what to do if it is neither up nor down.
+            raise ValueError(
+                "where should be either 'first', 'up', 'down', not %r" % where
+            )
 
         self.things.setCurrentIndex(self.things_model.index(new))
 
