@@ -9,8 +9,7 @@ __version__ = "1.8-dev"
 import os
 import sys
 
-from PySide import QtCore, QtGui
-from PySide.QtCore import Qt
+from Qt import QtCore, QtGui, QtWidgets
 
 
 def find_menu_items(menu, _path = None):
@@ -262,13 +261,13 @@ class NodeModel(QtCore.QAbstractListModel):
     def rowCount(self, parent = QtCore.QModelIndex()):
         return min(self.num_items, len(self._items))
 
-    def data(self, index, role = Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    def data(self, index, role = QtCore.Qt.DisplayRole):
+        if role == QtCore.Qt.DisplayRole:
             # Return text to display
             raw = self._items[index.row()]['text']
             return raw
 
-        elif role == Qt.DecorationRole:
+        elif role == QtCore.Qt.DecorationRole:
             weight = self._items[index.row()]['score']
 
             hue = 0.4
@@ -283,7 +282,7 @@ class NodeModel(QtCore.QAbstractListModel):
             pix.fill(col)
             return pix
 
-        elif role == Qt.BackgroundRole:
+        elif role == QtCore.Qt.BackgroundRole:
             return
             weight = self._items[index.row()]['score']
 
@@ -317,7 +316,7 @@ class NodeModel(QtCore.QAbstractListModel):
         return selected_data
 
 
-class TabyLineEdit(QtGui.QLineEdit):
+class TabyLineEdit(QtWidgets.QLineEdit):
     pressed_arrow = QtCore.Signal(str)
     cancelled = QtCore.Signal()
 
@@ -352,7 +351,7 @@ class TabyLineEdit(QtGui.QLineEdit):
             return super(TabyLineEdit, self).event(event)
 
 
-class TabTabTabWidget(QtGui.QDialog):
+class TabTabTabWidget(QtWidgets.QDialog):
     def __init__(self, on_create = None, parent = None, winflags = None):
         super(TabTabTabWidget, self).__init__(parent = parent)
         if winflags is not None:
@@ -376,11 +375,11 @@ class TabTabTabWidget(QtGui.QDialog):
 
         # List of stuff, and associated model
         self.things_model = NodeModel(nodes, weights = self.weights)
-        self.things = QtGui.QListView()
+        self.things = QtWidgets.QListView()
         self.things.setModel(self.things_model)
 
         # Add input and items to layout
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.input)
         layout.addWidget(self.things)
 
@@ -411,7 +410,7 @@ class TabTabTabWidget(QtGui.QDialog):
 
         # Get cursor position, and screen dimensions on active screen
         cursor = QtGui.QCursor().pos()
-        screen = QtGui.QDesktopWidget().screenGeometry(cursor)
+        screen = QtWidgets.QDesktopWidget().screenGeometry(cursor)
 
         # Get window position so cursor is just over text input
         xpos = cursor.x() - (self.width()/2)
@@ -534,7 +533,7 @@ def main():
         except ImportError:
             print "Error creating %s" % thing
 
-    t = TabTabTabWidget(on_create = on_create, winflags = Qt.FramelessWindowHint)
+    t = TabTabTabWidget(on_create = on_create, winflags = QtCore.Qt.FramelessWindowHint)
 
     # Make dialog appear under cursor, as Nuke's builtin one does
     t.under_cursor()
@@ -557,6 +556,7 @@ if __name__ == '__main__':
         m_edit.addCommand("Tabtabtab", main, "Tab")
     except ImportError:
         # For testing outside Nuke
-        app = QtGui.QApplication(sys.argv)
+        app = QtWidgets.QApplication(sys.argv)
         main()
         app.exec_()
+
