@@ -104,6 +104,10 @@ For example, "ax" matches "AddMix [Merge]" and "Axis [3D]". If you
 type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
 [3D]"
 
+## Dependencies
+
+tabtabtab-nuke now requires [Qt.py](https://github.com/mottosso/Qt.py) which has been added as a compatibility layer.  
+
 ## Change log
 
 * `v1.0`
@@ -177,4 +181,4 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
     reason.
     [Github issue #13](https://github.com/dbr/tabtabtab-nuke/issues/13)
     
-  * Support PySide2
+  * Uses [Qt.py](https://github.com/mottosso/Qt.py) to support PySide2
