@@ -12,17 +12,21 @@ import sys
 from Qt import QtCore, QtGui, QtWidgets
 
 
-def find_menu_items(menu, _path = None):
+def find_menu_items(menu, _path=None):
     """Extracts items from a given Nuke menu
 
     Returns a list of strings, with the path to each item
 
-    Ignores divider lines and hidden items (ones like "@;&CopyBranch" for shift+k)
+    Ignores divider lines and hidden items
+        (ones like "@;&CopyBranch" for shift+k)
 
     >>> found = find_menu_items(nuke.menu("Nodes"))
     >>> found.sort()
     >>> found[:5]
-    ['3D/Axis', '3D/Camera', '3D/CameraTracker', '3D/DepthGenerator', '3D/Geometry/Card']
+    [
+        '3D/Axis', '3D/Camera', '3D/CameraTracker',
+        '3D/DepthGenerator', '3D/Geometry/Card'
+    ]
     """
     import nuke
 
@@ -39,7 +43,7 @@ def find_menu_items(menu, _path = None):
                 # Remove all ToolSets delete commands
                 continue
 
-            sub_found = find_menu_items(menu = i, _path = subpath)
+            sub_found = find_menu_items(menu=i, _path=subpath)
             found.extend(sub_found)
         elif isinstance(i, nuke.MenuItem):
             if i.name() == "":
@@ -55,7 +59,7 @@ def find_menu_items(menu, _path = None):
     return found
 
 
-def nonconsec_find(needle, haystack, anchored = False):
+def nonconsec_find(needle, haystack, anchored=False):
     """checks if each character of "needle" can be found in order (but not
     necessarily consecutivly) in haystack.
     For example, "mm" can be found in "matchmove", but not "move2d"
@@ -102,7 +106,6 @@ def nonconsec_find(needle, haystack, anchored = False):
         # ..?
         return True
 
-
     # Turn haystack into list of characters (as strings are immutable)
     haystack = [hay for hay in str(haystack)]
 
@@ -135,7 +138,7 @@ def nonconsec_find(needle, haystack, anchored = False):
 
 
 class NodeWeights(object):
-    def __init__(self, fname = None):
+    def __init__(self, fname=None):
         self.fname = fname
         self._weights = {}
         self._successful_load = False
@@ -170,8 +173,10 @@ class NodeWeights(object):
 
         if not self._successful_load:
             # Avoid clobbering existing weights file on load error
-            print("Not writing weights file because %r previously failed to load" % (
-                self.fname))
+            print(
+                    "Not writing weights file because %r previously failed to "
+                    "load." % self.fname
+            )
             return
 
         def _save_internal():
@@ -186,7 +191,7 @@ class NodeWeights(object):
 
             f = open(self.fname, "w")
             # TODO: Limit number of saved items to some sane number
-            json.dump(self._weights, fp = f)
+            json.dump(self._weights, fp=f)
             f.close()
 
         # Catch any errors, print(traceback and continue)
@@ -197,7 +202,7 @@ class NodeWeights(object):
             import traceback
             traceback.print_exc()
 
-    def get(self, k, default = 0):
+    def get(self, k, default=0):
         if len(self._weights.values()) == 0:
             maxval = 1.0
         else:
@@ -213,7 +218,7 @@ class NodeWeights(object):
 
 
 class NodeModel(QtCore.QAbstractListModel):
-    def __init__(self, mlist, weights, num_items = 15, filtertext = ""):
+    def __init__(self, mlist, weights, num_items=15, filtertext=""):
         super(NodeModel, self).__init__()
 
         self.weights = weights
@@ -240,7 +245,9 @@ class NodeModel(QtCore.QAbstractListModel):
         for n in self._all:
             # Turn "3D/Shader/Phong" into "Phong [3D/Shader]"
             menupath = n['menupath'].replace("&", "")
-            uiname = "%s [%s]" % (menupath.rpartition("/")[2], menupath.rpartition("/")[0])
+            uiname = "%s [%s]" % (
+                menupath.rpartition("/")[2], menupath.rpartition("/")[0]
+            )
 
             if nonconsec_find(filtertext, uiname.lower(), anchored=True):
                 # Matches, get weighting and add to list of stuff
@@ -253,15 +260,16 @@ class NodeModel(QtCore.QAbstractListModel):
                         'score': score})
 
         # Store based on scores (descending), then alphabetically
-        s = sorted(scored, key = lambda k: (-k['score'], k['text']))
+        s = sorted(scored, key=lambda k: (-k['score'], k['text']))
 
         self._items = s
         self.modelReset.emit()
 
-    def rowCount(self, parent = QtCore.QModelIndex()):
+    def rowCount(self, parent=QtCore.QModelIndex()):
+        """Reimplementation of QtCore.QAbstractListModel virtual method."""
         return min(self.num_items, len(self._items))
 
-    def data(self, index, role = QtCore.Qt.DisplayRole):
+    def data(self, index, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
             # Return text to display
             raw = self._items[index.row()]['text']
@@ -283,18 +291,8 @@ class NodeModel(QtCore.QAbstractListModel):
             return pix
 
         elif role == QtCore.Qt.BackgroundRole:
+            # Removing unreachable code.
             return
-            weight = self._items[index.row()]['score']
-
-            hue = 0.4
-            sat = weight ** 2 # gamma saturation to make faster falloff
-
-            sat = min(1.0, sat)
-
-            if index.row() % 2 == 0:
-                return QtGui.QColor.fromHsvF(hue, sat, 0.9)
-            else:
-                return QtGui.QColor.fromHsvF(hue, sat, 0.8)
         else:
             # Ignore other roles
             return None
@@ -320,7 +318,6 @@ class TabyLineEdit(QtWidgets.QLineEdit):
     pressed_arrow = QtCore.Signal(str)
     cancelled = QtCore.Signal()
 
-
     def event(self, event):
         """Make tab trigger returnPressed
 
@@ -335,7 +332,7 @@ class TabyLineEdit(QtWidgets.QLineEdit):
             return True
 
         elif is_keypress and event.key() == QtCore.Qt.Key_Up:
-            # These could be done in keyPressedEvent, but.. this is already here
+            # These could be done in keyPressedEvent, but..this is already here
             self.pressed_arrow.emit("up")
             return True
 
@@ -352,8 +349,8 @@ class TabyLineEdit(QtWidgets.QLineEdit):
 
 
 class TabTabTabWidget(QtWidgets.QDialog):
-    def __init__(self, on_create = None, parent = None, winflags = None):
-        super(TabTabTabWidget, self).__init__(parent = parent)
+    def __init__(self, on_create=None, parent=None, winflags=None):
+        super(TabTabTabWidget, self).__init__(parent=parent)
         if winflags is not None:
             self.setWindowFlags(winflags)
 
@@ -367,14 +364,17 @@ class TabTabTabWidget(QtWidgets.QDialog):
         self.input = TabyLineEdit()
 
         # Node weighting
-        self.weights = NodeWeights(os.path.expanduser("~/.nuke/tabtabtab_weights.json"))
-        self.weights.load() # weights.save() called in close method
+        self.weights = NodeWeights(
+            os.path.expanduser("~/.nuke/tabtabtab_weights.json")
+        )
+        self.weights.load()  # weights.save() called in close method
 
         import nuke
-        nodes = find_menu_items(nuke.menu("Nodes")) + find_menu_items(nuke.menu("Nuke"))
+        nodes = find_menu_items(nuke.menu("Nodes"))
+        nodes += find_menu_items(nuke.menu("Nuke"))
 
         # List of stuff, and associated model
-        self.things_model = NodeModel(nodes, weights = self.weights)
+        self.things_model = NodeModel(nodes, weights=self.weights)
         self.things = QtWidgets.QListView()
         self.things.setModel(self.things_model)
 
@@ -391,8 +391,10 @@ class TabTabTabWidget(QtWidgets.QDialog):
         self.input.textChanged.connect(self.update)
 
         # Reset selection on text change
-        self.input.textChanged.connect(lambda: self.move_selection(where="first"))
-        self.move_selection(where = "first") # Set initial selection
+        self.input.textChanged.connect(
+            lambda: self.move_selection(where="first")
+        )
+        self.move_selection(where="first")  # Set initial selection
 
         # Create node when enter/tab is pressed, or item is clicked
         self.input.returnPressed.connect(self.create)
@@ -425,8 +427,9 @@ class TabTabTabWidget(QtWidgets.QDialog):
 
     def move_selection(self, where):
         if where not in ["first", "up", "down"]:
-            raise ValueError("where should be either 'first', 'up', 'down', not %r" % (
-                    where))
+            raise ValueError(
+                "where should be either 'first', 'up', 'down', not %r" % where
+            )
 
         first = where == "first"
         up = where == "up"
@@ -507,12 +510,14 @@ class TabTabTabWidget(QtWidgets.QDialog):
         self.input.setText(prev_string)
 
         # Create node, increment weight and close
-        self.cb_on_create(thing = thing)
+        self.cb_on_create(thing=thing)
         self.weights.increment(thing['menupath'])
         self.close()
 
 
 _tabtabtab_instance = None
+
+
 def main():
     global _tabtabtab_instance
 
@@ -533,7 +538,10 @@ def main():
         except ImportError:
             print("Error creating %s" % thing)
 
-    t = TabTabTabWidget(on_create = on_create, winflags = QtCore.Qt.FramelessWindowHint)
+    t = TabTabTabWidget(
+        on_create=on_create,
+        winflags=QtCore.Qt.FramelessWindowHint
+    )
 
     # Make dialog appear under cursor, as Nuke's builtin one does
     t.under_cursor()
@@ -559,4 +567,3 @@ if __name__ == '__main__':
         app = QtWidgets.QApplication(sys.argv)
         main()
         app.exec_()
-
