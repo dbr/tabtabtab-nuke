@@ -9,21 +9,8 @@ __version__ = "1.8-dev"
 import os
 import sys
 
-try:
-    from PySide2 import QtCore, QtGui, QtWidgets
-    from PySide2.QtCore import Qt
-except ImportError:
-    try:
-        from PySide import QtCore, QtGui, QtGui as QtWidgets
-        from PySide.QtCore import Qt
-    except ImportError:
-        import sip
-        for mod in ("QDate", "QDateTime", "QString", "QTextStream", "QTime", "QUrl", "QVariant"):
-            sip.setapi(mod, 2)
-
-        from PyQt4 import QtCore, QtGui
-        from PyQt4.QtCore import Qt
-        QtCore.Signal = QtCore.pyqtSignal
+from PySide import QtCore, QtGui
+from PySide.QtCore import Qt
 
 
 def find_menu_items(menu, _path = None):
@@ -330,7 +317,7 @@ class NodeModel(QtCore.QAbstractListModel):
         return selected_data
 
 
-class TabyLineEdit(QtWidgets.QLineEdit):
+class TabyLineEdit(QtGui.QLineEdit):
     pressed_arrow = QtCore.Signal(str)
     cancelled = QtCore.Signal()
 
@@ -365,7 +352,7 @@ class TabyLineEdit(QtWidgets.QLineEdit):
             return super(TabyLineEdit, self).event(event)
 
 
-class TabTabTabWidget(QtWidgets.QDialog):
+class TabTabTabWidget(QtGui.QDialog):
     def __init__(self, on_create = None, parent = None, winflags = None):
         super(TabTabTabWidget, self).__init__(parent = parent)
         if winflags is not None:
@@ -389,11 +376,11 @@ class TabTabTabWidget(QtWidgets.QDialog):
 
         # List of stuff, and associated model
         self.things_model = NodeModel(nodes, weights = self.weights)
-        self.things = QtWidgets.QListView()
+        self.things = QtGui.QListView()
         self.things.setModel(self.things_model)
 
         # Add input and items to layout
-        layout = QtWidgets.QVBoxLayout()
+        layout = QtGui.QVBoxLayout()
         layout.addWidget(self.input)
         layout.addWidget(self.things)
 
@@ -424,7 +411,7 @@ class TabTabTabWidget(QtWidgets.QDialog):
 
         # Get cursor position, and screen dimensions on active screen
         cursor = QtGui.QCursor().pos()
-        screen = QtWidgets.QDesktopWidget().screenGeometry(cursor)
+        screen = QtGui.QDesktopWidget().screenGeometry(cursor)
 
         # Get window position so cursor is just over text input
         xpos = cursor.x() - (self.width()/2)
