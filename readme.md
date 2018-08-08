@@ -169,7 +169,7 @@ type "ax[3" or "ax 3" (ax-space-space-3) it will only match "Axis
     node (contrived example: the restored `Blur [Filter]` search text
     might have matched the more highly weighted `Blur2 [Filter]`)
 
-* `v1.8` (wip)
+* `v1.8`
 
   * Installation instructions updated to support Nuke 9
 
