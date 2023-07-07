@@ -277,7 +277,7 @@ class NodeModel(QtCore.QAbstractListModel):
             menupath = n['menupath'].replace("&", "")
             uiname = "%s [%s]" % (menupath.rpartition("/")[2], menupath.rpartition("/")[0])
 
-            if nonconsec_find(filtertext, uiname.lower(), anchored=True):
+            if nonconsec_find(filtertext, uiname.lower(), anchored=False):
                 # Matches, get weighting and add to list of stuff
                 score = self.weights.get(n['menupath'])
 
