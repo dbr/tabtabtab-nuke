@@ -406,7 +406,7 @@ class TabTabTabWidget(QtWidgets.QDialog):
         self.weights.load() # weights.save() called in close method
 
         import nuke
-        nodes = find_menu_items(nuke.menu("Nodes")) + find_menu_items(nuke.menu("Nuke"))
+        nodes = find_menu_items(nuke.menu("Nodes"))
 
         # List of stuff, and associated model
         self.things_model = NodeModel(nodes, weights = self.weights)
