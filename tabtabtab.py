@@ -9,6 +9,14 @@ __version__ = "1.8-dev"
 import os
 import sys
 
+
+if sys.version_info[0] == 2:
+    text_type = unicode
+    binary_type = str
+else:
+    text_type = str
+    binary_type = bytes
+
 try:
     from PySide2 import QtCore, QtGui, QtWidgets
     from PySide2.QtCore import Qt
@@ -24,6 +32,17 @@ except ImportError:
         from PyQt4 import QtCore, QtGui
         from PyQt4.QtCore import Qt
         QtCore.Signal = QtCore.pyqtSignal
+
+
+def cast_text(v):
+    # type: (object) -> str
+    if isinstance(v, text_type):
+        return v
+    if v is None:
+        return ""
+    if isinstance(v, binary_type):
+        return v.decode("utf-8")
+    return text_type(v)
 
 
 def find_menu_items(menu, _path = None):
@@ -101,7 +120,8 @@ def nonconsec_find(needle, haystack, anchored = False):
     True
     """
     
-    needle = unicode(needle).encode('UTF-8')
+    needle = cast_text(needle)
+    haystack = cast_text(haystack)
     if "[" not in needle:
         haystack = haystack.rpartition(" [")[0]
 
@@ -119,7 +139,7 @@ def nonconsec_find(needle, haystack, anchored = False):
 
 
     # Turn haystack into list of characters (as strings are immutable)
-    haystack = [hay for hay in str(haystack)]
+    haystack = [hay for hay in haystack]
 
     if needle.startswith(" "):
         # "[space]abc" does consecutive search for "abc" in "abcdef"
